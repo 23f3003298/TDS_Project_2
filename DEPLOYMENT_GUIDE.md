@@ -1,32 +1,23 @@
+🌐 TDS Project 2 Data Analyst – Render Deployment Guide
 
-# 🚄 **TDS Project 2 Data Analyst – Railway Deployment Guide**
-
-Easily deploy your **AI-powered Data Analyst Agent** to **Railway** in minutes.
+Easily deploy your AI-powered Data Analyst Agent to Render in minutes.
 Follow these steps and your app will be live with a public URL.
 
----
+✅ What’s Already Set Up
 
-## ✅ **What’s Already Set Up**
+Your repo already includes the necessary config files:
 
-The repo includes all necessary Railway config files:
+File	Purpose
+.env	Stores environment variables (e.g., API keys)
+requirements.txt	Python dependencies
+Procfile	Tells Render how to start the app (Gunicorn)
+runtime.txt	Python version specification
+.gitignore	Prevents committing sensitive files like .env
+🔑 1. Configure Environment Variables
 
-| File            | Purpose                                       |
-| --------------- | --------------------------------------------- |
-| `.env`          | Stores environment variables (e.g., API keys) |
-| `Dockerfile`    | Defines container build                       |
-| `railway.json`  | Railway deployment configuration              |
-| `Procfile`      | Tells Railway how to start the app            |
-| `runtime.txt`   | Python version specification                  |
-| `.dockerignore` | Files to ignore during Docker build           |
+Create a .env file in your project root (for local testing):
 
----
-
-## 🔑 **1. Configure Environment Variables**
-
-Create a `.env` file in your project root and add your details:
-
-```env
-# Google Gemini API Keys (Add 1–10 keys for load balancing if you don't have multiple key just paste your one key in all variable)
+# Google Gemini API Keys (copy one key into all slots if you have only one)
 gemini_api_1=your_api_key_here
 gemini_api_2=your_api_key_here
 gemini_api_3=your_api_key_here
@@ -39,107 +30,90 @@ gemini_api_9=your_api_key_here
 gemini_api_10=your_api_key_here
 LLM_TIMEOUT_SECONDS=240
 
-```
-> ⚠ **if you don't have multiple gemini key just copy one key in all. but my recommendation is used atleast two different key for fallback mechanism to work properly
----
-> ⚠ **Never commit your `.env` file** to GitHub. Add it to `.gitignore`.
 
----
+⚠️ Never commit your .env file to GitHub. Keep it local and add to .gitignore.
 
-## 📤 **2. Push Code to GitHub**
-
-```bash
+📤 2. Push Code to GitHub
 cd /path/to/project
 git init
 git add .
-git commit -m "Initial commit with Railway deployment config"
+git commit -m "Initial commit with Render deployment config"
+git branch -M main
 git remote add origin https://github.com/your-username/your-repo.git
 git push -u origin main
-```
 
----
+🚀 3. Deploy to Render
 
-## 🚀 **3. Deploy to Railway**
+Go to render.com → Sign in with GitHub.
 
-### **Option A – Dashboard**
+Click New → Web Service.
 
-1. Visit [railway.app](https://railway.app)
-2. Sign in with GitHub
-3. **New Project → Deploy from GitHub**
-4. Select your repo
-5. Railway will auto-deploy
+Select your GitHub repo.
 
-### **Option B – CLI**
+Fill in deployment settings:
 
-```bash
-npm install -g @railway/cli
-railway login
-railway init
-railway link
-railway up
-```
+Environment → Python 3.x
 
----
+Build Command →
 
-## 🌍 **4. Add Environment Variables in Railway**
+pip install -r requirements.txt
 
-1. Go to your Railway project
-2. Click **Variables**
-3. Add your Gemini keys & settings exactly as in `.env`
 
----
+Start Command (example for FastAPI):
 
-## 🧪 **5. Test Locally**
+gunicorn app:app -w 4 -k uvicorn.workers.UvicornWorker -b 0.0.0.0:$PORT
 
-```bash
+
+(replace app:app with your actual entrypoint if different, e.g. main:app)
+
+Click Create Web Service → Render will build and deploy.
+
+After a few minutes, you’ll get a live public URL (e.g., https://your-service.onrender.com).
+
+🌍 4. Add Environment Variables in Render
+
+Go to your Render service → Settings → Environment → Environment Variables.
+
+Add your Gemini keys and other variables just like in .env.
+
+Example:
+
+Key	Value
+gemini_api_1	your_api_key_here
+…	…
+LLM_TIMEOUT_SECONDS	240
+🧪 5. Test Locally
 source venv/bin/activate   # Windows: venv\Scripts\activate
 uvicorn app:app --host 0.0.0.0 --port 8000
-```
 
-Visit: **[http://localhost:8000](http://localhost:8000)**
 
----
+Visit: http://localhost:8000
 
-## 🐳 **6. (Optional) Test with Docker**
+⚙ Environment Variable Reference
+Variable	Description	Default	Required
+gemini_api_1……gemini_api_10	Google Gemini API keys	—	✅ (at least 1; if only one, duplicate it in all slots)
+LLM_TIMEOUT_SECONDS	LLM Max Time for task	240	❌
+PORT	App port	Auto-assigned by Render	✅ (use $PORT)
+🛠 Troubleshooting
 
-```bash
-docker build -t tds-data-analyst .
-docker run -p 8000:8000 --env-file .env tds-data-analyst
-```
+Common Issues
 
----
+Module not found → Check requirements.txt.
 
-## ⚙ **Environment Variable Reference**
+Port errors → Always bind to $PORT (Render assigns it).
 
-| Variable                       | Description            | Default          | Required       |
-| ------------------------------ | ---------------------- | ---------------- | -------------- |
-| `gemini_api_1`......`gemini_api_10` | Google Gemini API keys | —                | ✅ (at least 1 but make copy of it in all variable) |
-| `LLM_TIMEOUT_SECONDS`          | LLM Max Time for task  | 240              | ❌              |
-| `PORT`                         | App port               | 8000             | ❌              |
+API key errors → Make sure all keys are added in Render Environment Variables.
 
----
+Build fails → Check Render Logs for dependency errors.
 
-## 🛠 **Troubleshooting**
+View Logs:
 
-**Common Issues**
+Go to your service → Logs tab.
 
-* `Module not found` → Check `requirements.txt`
-* Port conflict → Use Railway’s `PORT` variable in architecture => project=> setting => networking => edit =>select default port (uvicorn)
-* API key errors → Ensure keys are correct in Railway Variables
-* Build fails → See Railway build logs
+📚 Helpful Links
 
-**View Logs**
+📖 Render Docs
 
-```bash
-railway logs
-```
+🤖 Google AI Docs
 
----
-
-## 📚 **Helpful Links**
-
-* 📖 [Railway Docs](https://docs.railway.app)
-* 🤖 [Google AI Docs](https://ai.google.dev)
-
----
-
+⚡ With this setup, your Data Analyst Agent will run reliably on Render and scale automatically with traffic.
